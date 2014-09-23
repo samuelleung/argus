@@ -1,62 +1,65 @@
 <?php
+   
+   // 
+   //   in: data file path(done), day range(done), attr, key, no of line per page, page no
+   //   out: records
+   //
+   
+   $j=0;
+   $datafilepath='datafile/';
+   $filedate = $_GET['filedate'];
+   $dayrange = 2;
+   $attr = $_GET['attr'];
 
-// 
-//   in: data file path(done), day range(done), attr, key, no of line per page, page no
-//   out: records
-//
+   if (!$_GET['key']) {
+      echo "Search key not found";
+      throw new Exception('Search key not found'); 
+   } else {
+      $key = $_GET['key'];
+   }
 
-$j=0;
-$datafilepath='datafile/';
-$filedate = $_GET['filedate'];
-$dayrange = 2;
+   if (!$_GET['attr'])
+      $pattern = "/^".$key."/";
+   else
+      $pattern = "/".$key."/";
+   
+   
+   $files = glob("datafile/".$filedate."*gz", GLOB_BRACE);
+   if (!$_GET['filedate'] || !$files) { 
+      echo "Data file not found";
+      throw new Exception('Data file not found'); 
+   } else {
+      foreach($files as $file) {
+      $fp = gzopen($file, 'r');
+   
+      while ( !feof($fp) )
+      {
+          $line = fgets($fp, 2048);
+   
+          $delimiter = "\t";
+          $data = str_getcsv($line, $delimiter);
+   
 
-$files = glob("datafile/".$filedate."*gz", GLOB_BRACE);
-if (!$files) { echo "Data file not found"; }
-else {
-foreach($files as $file) {
-$fp = gzopen($file, 'r');
+//          preg_match($pattern, $line, $matches, PREG_OFFSET_CAPTURE, 3);
 
-while ( !feof($fp) )
-{
-    $line = fgets($fp, 2048);
+          if (preg_match($pattern,$line)) {
+             $result[$j++] = $line;
+          }
 
-
-    $delimiter = "\t";
-    $data = str_getcsv($line, $delimiter);
-
-    $result[$j++] = $data;
-}                              
-
-gzclose($fp);
-
-
-}
-
-}
-
-
+      }                              
+   
+      gzclose($fp);
+      }
+   
+   }
+   
+   // Output 
+   var_dump($result);
 /*
-
-for ($i=0;$i<=$dayrange;$i++) {
-
-
-$fp = fopen($datafilepath.$filedate, 'r');
-
-while ( !feof($fp) )
-{
-    $line = fgets($fp, 2048);
-
-
-    $delimiter = "\t";
-    $data = str_getcsv($line, $delimiter);
-
-    $result[$i] = $data;
-}                              
-
-fclose($fp);
-}
+   foreach($result as $line) {
+      print_r($line);
+      echo "\n";
+   }
 */
-
-print_r($result);
-
+   
 php?>

@@ -7,25 +7,25 @@
    
    $j=0;
    $datafilepath='datafile/';
-   $filedate = $_GET['filedate'];
+   $filedate = $_REQUEST['filedate'];
    $dayrange = 2;
-   $attr = $_GET['attr'];
+   $attr = $_REQUEST['attr'];
 
-   if (!$_GET['key']) {
+   if (!isset($_REQUEST['key'])) {
       echo "Search key not found";
       throw new Exception('Search key not found'); 
    } else {
-      $key = $_GET['key'];
+      $key = $_REQUEST['key'];
    }
 
-   if (!$_GET['attr'])
+   if (!isset($_REQUEST['attr']))
       $pattern = "/^".$key."/";
    else
       $pattern = "/".$key."/";
    
    
    $files = glob("datafile/".$filedate."*gz", GLOB_BRACE);
-   if (!$_GET['filedate'] || !$files) { 
+   if (!isset($_REQUEST['filedate']) || !$files) { 
       echo "Data file not found";
       throw new Exception('Data file not found'); 
    } else {
@@ -54,12 +54,14 @@
    }
    
    // Output 
-   var_dump($result);
-/*
-   foreach($result as $line) {
-      print_r($line);
-      echo "\n";
-   }
-*/
+   if (isset($_REQUEST['output']))
+     switch ($_REQUEST['output']) {
+       case 0: 
+        echo json_encode($result,JSON_PRETTY_PRINT);
+       default: 
+         var_dump($result);
+     }
+    else
+      var_dump($result);
    
 php?>
